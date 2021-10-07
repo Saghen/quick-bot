@@ -1,0 +1,36 @@
+{
+  "name": "quick-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --watch src/**/*.ts --exec \"node scripts/build.js && node dist/main.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/opus": "^0.5.3",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/voice": "^0.6.0",
+    "@types/request": "^2.48.7",
+    "discord-api-types": "^0.23.1",
+    "discord.js": "^13.2.0",
+    "dotenv": "^10.0.0",
+    "esbuild": "^0.13.4",
+    "libsodium-wrappers": "^0.7.9",
+    "node-fetch": "^2.6.5",
+    "node-spotify-api": "^1.1.1",
+    "request": "^2.88.2",
+    "sodium": "^3.0.2",
+    "spotify-web-api-node": "^5.0.2",
+    "ytdl-core": "^4.9.1",
+    "ytsr": "^3.5.3"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.12",
+    "@types/spotify-web-api-node": "^5.0.3",
+    "nodemon": "^2.0.13"
+  }
+}
