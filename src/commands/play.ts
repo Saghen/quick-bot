@@ -1,12 +1,12 @@
-import { createAudioPlayer } from '@discordjs/voice'
-import { StageChannel } from 'discord.js/src/index.js'
-import { Client, Message, VoiceChannel } from 'discord.js/typings/index.js'
 import { URL } from 'url'
-import { getBasicInfo, validateURL as validateYTURL } from 'ytdl-core'
-import { createQueue, QueueItem } from '../lib/queue'
+import { QueueItem } from '../lib/queue'
 
+import { isValidUrl as defaultIsValidUrl, getAudio as defaultGetAudio } from '../providers/default'
 import { isValidUrl as ytIsValidUrl, getAudio as ytGetAudio } from '../providers/youtube'
 import { isValidUrl as spotifyIsValidUrl, getAudio as spotifyGetAudio } from '../providers/spotify'
+import { Middleware } from '@middleware/types'
+import { attachToChannel, isInVoiceChannel, showTyping } from '@middleware/channel'
+import { populateQueue } from '@middleware/queue'
 
 function isValidUrl(url: string) {
   try {
@@ -23,6 +23,7 @@ function isValidUrl(url: string) {
 export enum URLType {
   YOUTUBE = 'youtube',
   SPOTIFY = 'spotify',
+  DEFAULT = 'default',
   // SOUNDCLOUD = 'soundcloud',
   // FILE = 'file'
 }
@@ -33,34 +34,25 @@ export type AudioGetter = (url: URL) => Promise<QueueItem[]>
 const urlTypeCheckers: Record<URLType, UrlChecker> = {
   [URLType.YOUTUBE]: ytIsValidUrl,
   [URLType.SPOTIFY]: spotifyIsValidUrl,
+  [URLType.DEFAULT]: defaultIsValidUrl,
 }
 
 const audioGetters: Record<URLType, AudioGetter> = {
   [URLType.YOUTUBE]: ytGetAudio,
   [URLType.SPOTIFY]: spotifyGetAudio,
+  [URLType.DEFAULT]: defaultGetAudio,
 }
 
 function getURLType(url: URL): URLType | undefined {
-  return Object.keys(urlTypeCheckers).find((urlType) => urlTypeCheckers[urlType](url)) as URLType | undefined
+  return (Object.keys(urlTypeCheckers).find((urlType) => urlTypeCheckers[urlType](url)) as URLType) ?? URLType.DEFAULT
 }
 
 function getAudio(url: URL, urlType: URLType): Promise<QueueItem[]> {
   return audioGetters[urlType](url)
 }
 
-export default async function play(client: Client, message: Message, command: 'p' | 'play', args: string[]) {
-  const channel = message.member?.voice?.channel
-  if (!channel || !channel.isVoice()) {
-    message.reply("You're not in a channel bozo")
-    return
-  }
-  if (!channel.joinable || channel instanceof StageChannel) {
-    message.reply('Make me admin I cant join u')
-    return
-  }
-
-  const queue = createQueue(channel as VoiceChannel)
-
+type play = Middleware
+const play: Middleware = async ({ message, args, queue }) => {
   if (!isValidUrl(args[0])) {
     message.reply('Provide an actual url :joy_cat:')
     return
@@ -77,5 +69,7 @@ export default async function play(client: Client, message: Message, command: 'p
     await queue.add(item)
   }
 
-  message.reply('fuck off')
+  message.channel.send(`Queued ${queueItems[0].name}`)
 }
+
+export default [isInVoiceChannel, populateQueue, attachToChannel, showTyping, play]

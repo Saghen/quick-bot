@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "baseUrl": "src",
+    "paths": {
+      "@commands/*": ["./commands/*"],
+      "@lib/*": ["./lib/*"],
+      "@logger": ["./lib/logger.ts"],
+      "@middleware/*": ["./middleware/*"],
+      "@providers/*": ["./providers/*"],
+    }
+  }
+}
